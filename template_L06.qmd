@@ -1,0 +1,251 @@
+---
+title: "L06 Model Workflows & Recipes"
+subtitle: "Foundations of Data Science with R (STAT 359)"
+author: "YOUR NAME"
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+    code-fold: show
+    link-external-newwindow: true
+    
+execute:
+  warning: false
+  
+from: markdown+emoji  
+---
+
+:::{.callout-important collapse=true}
+## When completing your lab write-up
+
+Students must work in an R project connected to a GitHub repository for each lab. The repository should be well organized and it should have all relevant files. Within the project/repo there should be
+
+- an appropriately named qmd file and 
+- the associated rendered html file (see canvas for naming convention);
+- there should be multiple R scripts (appropriately named and ordered) completing the work in the labs;
+- students should create/update README files in GitHub accordingly;
+
+Data processing and model fitting, especially model fitting, can take significant computational time. Re-running time consuming processes when rendering a document is extremely inefficient and must be avoided. 
+
+This means students should practice writing these processes in scripts, saving results, and then loading them correctly when needed in their lab write-ups. It sometimes will be necessary to display code (show it, but don't run it) or even hide some code chunks when providing answers in the lab write-up. 
+:::
+
+::: {.callout-tip icon=false}
+
+## Github Repo Link
+
+To link to your github **repo**sitory, appropriately edit the example link below. Meaning replace `https://your-github-repo-url` with your github repo url. Suggest verifying the link works before submitting.
+
+[https://your-github-repo-url](https://your-github-repo-url)
+
+:::
+
+## Overview
+
+The goal of this lab is to introduce the process of setting up a model workflow and adding a recipe.
+
+This lab accompanies [7. A model workflow](https://www.tmwr.org/workflows.html) and [8. Feature Engineering with recipes](https://www.tmwr.org/recipes.html) from [Tidy Modeling with R](https://www.tmwr.org/).
+
+::: {.callout-important collapse=true}
+
+## Setting a Seed
+
+Now that we are performing steps that involve randomness (for example data splitting and fitting random forest models) it is best practice to set a seed for the pseudo random algorithms. 
+
+**Why?** Because it ensures our random steps are reproducible which has all kinds of practical benefits. Kind of mind blowing to replicate things that are supposed to be random! 
+
+Students should set the seed directly before any random process and make a comment/note at the top of any R script that alerts potential users that a random process is being used.
+
+:::
+
+## Exercises
+
+We will be modifying and extending the work completed in L05. The work included specifying and fitting a model to predict home prices using the KC housing dataset (`data\kc_house_data.csv`). The dataset contains 21,613 house sale prices (`price`) and other information for homes sold between May 2014 and May 2015 in King County, WA.
+
+Code from L05 will likely be useful for reference and/or for building upon.
+
+### Exercise 1
+
+We are setting up our workflows for training predictive models so we should begin by setting up our training and testing sets.
+
+Begin by loading the data and making sure that it is minimally prepared for the fitting models. At minimum we should check that data is being read in correctly, variables are being typed correctly, and inspect the response/target variable (make adjustments if necessary).
+
+1. From L05 we know that we will want to perform a $log_{10}$ transformation of our outcome variable.
+2. We will want to re-type several variables as factors: `waterfront`, `view`, `condition`, and `grade`.
+
+Now perform an initial split of the dataset into testing and training sets using the `rsample` package. We suggest using strata when splitting because it is rarely a bad idea. Use the default number of strata. 
+
+*No display code needed because this should just be review.*
+
+What is the default number of strata used? 
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE
+
+:::
+
+### Exercise 2
+
+Define a recipe called `recipe_sink` that...
+
+::: {.callout-note collapse="true" icon="false"}
+## Note on kitchen sink recipes
+
+A kitchen sink recipe or basic recipe is a recipe the requires minimal effort. It requires no feature engineering and you should be able to get it running quickly.
+
+This recipe generally requires the bare minimum: removing inappropriate variables, imputing missing values, dummy encoding, handling zero variance, normalizing the distributions.
+
+:::
+
+- predicts the target variable with all other variables
+- removes any variables that are not appropriate as predictors
+- dummy encodes your factor variables
+- handles zero variance
+- centers and scales all predictors
+
+Check that the recipe is working as expected by applying it to the training data. Explain how we know the recipe is working as expected. 
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE
+
+:::
+
+### Exercise 3
+
+Let's create a different recipe for the random forest model. 
+
+::: {.callout-note collapse="true" icon="false"}
+## Note on tree-based pre-processing/recipes
+
+Tree-based methods:
+
+- naturally search out interactions, meaning that we typically don't need to specify any interactions (of course, there are exceptions). 
+- don't generally require predictor transformations (such as splines, Log-transforms, centering, scaling), but can be done since they will not meaningfully change anything.
+- typically work better using one-hot encoding instead of traditional dummy coding; this also has to do with the fact that they are empirically driven models, not mechanistic.
+:::
+
+Define a recipe called `recipe_sink_tree` that...
+
+- predicts the target variable with all other variables
+- removes any variables that are not appropriate as predictors
+- **one-hot encode any categorical predictors**
+- handles zero variance
+
+Check that the recipe is working as expected by applying it to the training data. Explain how we know the recipe is working as expected. 
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE --- display code for recipe only.
+
+:::
+
+### Exercise 4
+
+Define a recipe called `recipe_engineered`.
+
+::: {.callout-note collapse="true" icon="false"}
+## Note on feature engineering
+
+There are a variety of aspects to consider when conducting feature engineering. Variable selection, variable transformations, and interaction terms to name a few.
+:::
+
+- predicts the target variable using `waterfront`, `sqft_living`, `sqft_lot`, `bedrooms`, `lat`, and `date` 
+- Add a step to transform dummy variables
+- Add a step that does an appropriate transformation on `lat`
+- Add a step that does an appropriate transformation on `sqft_lot`
+- Add a step that extracts the `"month"` feature from `date`; we only want to use the month feature from `date` for prediction and nothing else 
+- handles zero variance
+- centers and scales all predictors
+
+Check that the recipe is working as expected by applying it to the training data. Explain how we know the recipe is working as expected. 
+
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE --- display code for recipe only.
+
+:::
+
+### Exercise 5
+
+Define a recipe called `recipe_engineered_tree`.
+
+Copy the recipe from Exercise 4 and modify it to be appropriate for a tree model. Hint: might help to read the callout in Exercise 3 for which steps are useful.
+
+Check that the recipe is working as expected by applying it to the training data. Explain how we know the recipe is working as expected. 
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE --- display code for recipe only.
+
+:::
+
+### Exercise 6
+
+Define the following model types in their respective scripts:
+
+- Ordinary linear regression
+- Random forest model using `ranger` with `trees = 500`, `min_n = 5`, and `mtry = 10` 
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE --- display code only
+
+:::
+
+### Exercise 7
+
+Create a workflow that adds the model specifications and recipe (each model type has 2 recipes so there will be 2 workflows for each model type).
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE --- display code only.
+
+:::
+
+### Exercise 8
+
+Train each workflow by fitting the workflow object to the training data. Store the results.
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE --- display code only
+
+:::
+
+### Exercise 9
+
+Evaluate which of the 4 models is best by using `predict()` and calculating the RMSE.
+
+Which model is the best? Why do you think that is?
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE - display table of results
+
+:::
+
+### Exercise 10
+
+For the **winning model only**, plot the predicted vs observed values on the original price scale.
+
+What proportion or percentage of the predicted prices are within 25% of the original price on the testing set? Is this value surprising or not surprising to you? Explain.
+
+::: {.callout-tip icon="false"}
+## Solution
+
+YOUR SOLUTION HERE
+
+:::
